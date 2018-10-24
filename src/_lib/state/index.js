@@ -55,7 +55,7 @@ export const createResource = ({ name, url, callback }) => {
       {
         (resource, act) =>
           <ResourceAutoLoader
-            url={url}
+            url={typeof url === 'function' ? url(otherProps) : url}
             resource={resource}
             act={act}
             callback={callback}
