@@ -1,22 +1,28 @@
-import React from 'react'
-import Resource from '_lib/ResourceWithContentCallback'
+import { createResource } from '_lib/state'
 
-export const contributorsResource = () =>
-  'https://api.github.com/repos/date-fns/date-fns/contributors?per_page=999'
+const url = 'https://api.github.com/repos/date-fns/date-fns/contributors?per_page=999'
 
-const processResourceContent = content =>
-  content.map(
-    user => ({
-      id: user.id,
-      url: user.html_url,
-      avatarUrl: user.avatar_url,
-      name: user.login,
-    })
-  )
+/**
+ * @example
+ * <Contributors renderLoading={Spinner}>
+ *   {
+ *     (contributors) =>
+ *       JSON.stringify(contributors)
+ *   }
+ * </Contributors>
+ */
+const Contributors = createResource({
+  name: 'Contributors',
+  url,
+  callback: content =>
+    content.map(
+      user => ({
+        id: user.id,
+        url: user.html_url,
+        avatarUrl: user.avatar_url,
+        name: user.login,
+      })
+    )
+})
 
-const VersionList = ({ children, renderLoading }) =>
-  <Resource url={contributorsResource()} contentCallback={processResourceContent} renderLoading={renderLoading}>
-    {children}
-  </Resource>
-
-export default VersionList
+export default Contributors
