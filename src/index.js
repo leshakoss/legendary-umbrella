@@ -24,6 +24,16 @@ const render = (state) =>
     document.getElementById('root')
   )
 
-loop({}, render)
+const exposeStateToConsoleAndRender = (state) => {
+  window.state = state
+  render(state)
+}
+
+loop(
+  {},
+  process.env.NODE_ENV === 'development'
+    ? exposeStateToConsoleAndRender
+    : render
+)
 
 registerServiceWorker()
