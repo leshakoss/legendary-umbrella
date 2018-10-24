@@ -1,5 +1,5 @@
 import React from 'react'
-import { get, set } from 'lodash'
+import { get, set, isFunction } from 'lodash'
 import { act } from 'enso'
 import produce from 'immer'
 
@@ -10,10 +10,10 @@ export { StateProvider, StateConsumer }
 
 export const createEntity = ({ name, path: getPath, initialValue: getInitialValue }) => {
   const Component = ({ children, ...otherProps }) => {
-    const path = typeof getPath === 'function'
+    const path = isFunction(getPath)
       ? getPath(otherProps)
       : getPath
-    const initialValue = typeof getInitialValue === 'function'
+    const initialValue = isFunction(getInitialValue)
       ? getInitialValue(otherProps)
       : getInitialValue
 
@@ -46,7 +46,7 @@ export const createResource = ({ name, url, callback }) => {
   const Entity = createEntity({
     name,
     path: (props) =>
-      ['resource', typeof url === 'function' ? url(props) : url],
+      ['resource', isFunction(url) ? url(props) : url],
     initialValue: { initializing: true, loading: true }
   })
 
@@ -55,7 +55,7 @@ export const createResource = ({ name, url, callback }) => {
       {
         (resource, act) =>
           <ResourceAutoLoader
-            url={typeof url === 'function' ? url(otherProps) : url}
+            url={isFunction(url) ? url(otherProps) : url}
             resource={resource}
             act={act}
             callback={callback}
