@@ -5,14 +5,14 @@ import registerServiceWorker from './registerServiceWorker'
 import { loop } from 'enso'
 
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
-import { StateProvider } from '_lib/state'
+import { State } from '_lib/state'
 import Home from 'ui/screens/Home'
 import Docs from 'ui/screens/Docs'
 import NotFound from 'ui/screens/NotFound'
 
 const render = (state) =>
   ReactDOM.render(
-    <StateProvider value={state}>
+    <State.Provider value={state}>
       <BrowserRouter>
         <Switch>
           <Route path="/" component={Home} />
@@ -20,7 +20,7 @@ const render = (state) =>
           <Route component={NotFound} />
         </Switch>
       </BrowserRouter>
-    </StateProvider>,
+    </State.Provider>,
     document.getElementById('root')
   )
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import Spinner from 'ui/components/Spinner'
 import VersionSelect from 'ui/components/VersionSelect'
-import Contributors from 'ui/resources/Contributors'
+import useContributors from 'ui/resources/Contributors'
 
 const UserListItem = ({ user }) =>
   <a href={user.url}>
@@ -9,22 +9,24 @@ const UserListItem = ({ user }) =>
     <span>{user.name}</span>
   </a>
 
-const Home = () =>
-  <div>
+const Home = () => {
+  const [{ content: contributors = [], loading }] = useContributors()
+
+  return <React.Fragment>
     <VersionSelect />
 
-    <Contributors renderLoading={Spinner}>
-      {
-        (contributors) =>
-          <ul>
-            {contributors.map(user =>
-              <li key={user.id}>
-                <UserListItem user={user} />
-              </li>
-            )}
-          </ul>
-      }
-    </Contributors>
-  </div>
+    {
+      loading
+        ? <Spinner />
+        : <ul>
+          {contributors.map(user =>
+            <li key={user.id}>
+              <UserListItem user={user} />
+            </li>
+          )}
+        </ul>
+    }
+  </React.Fragment>
+}
 
 export default Home

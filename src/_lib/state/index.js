@@ -1,72 +1,59 @@
-import React from 'react'
-import { get, set, isFunction } from 'lodash'
+import React, { useContext, useEffect } from 'react'
+import { get, set } from 'lodash'
 import { act } from 'enso'
 import produce from 'immer'
+import { getJSON } from '_lib/request'
 
-import ResourceAutoLoader from './components/ResourceAutoLoader'
+const State = React.createContext({})
+export { State }
 
-const { Provider: StateProvider, Consumer: StateConsumer } = React.createContext({})
-export { StateProvider, StateConsumer }
-
-export const createEntity = ({ name, path: getPath, initialValue: getInitialValue }) => {
-  const Component = ({ children, ...otherProps }) => {
-    const path = isFunction(getPath)
-      ? getPath(otherProps)
-      : getPath
-    const initialValue = isFunction(getInitialValue)
-      ? getInitialValue(otherProps)
-      : getInitialValue
-
-    const renderProp = state =>
-      children(
-        /**
-         * @param {object} entity
-         */
-        get(state, path, initialValue),
-        /**
-         * @param {function} act
-         */
-        (callback) =>
-          act(produce(state =>
-            set(state, path, callback(get(state, path, initialValue)))
-          ))
-      )
-  
-    return <StateConsumer>
-      {renderProp}
-    </StateConsumer>
-  }
-
-  Component.displayName = name
-
-  return Component
+export const useState = () => {
+  return [useContext(State), act]
 }
 
-export const createResource = ({ name, url, callback }) => {
-  const Entity = createEntity({
-    name,
-    path: (props) =>
-      ['resource', isFunction(url) ? url(props) : url],
-    initialValue: { initializing: true, loading: true }
+export const useEntity = ({ path, initialValue }) => {
+  const state = useContext(State)
+
+  const entity = get(state, path, initialValue)
+  const update = (callback) =>
+    act(produce(
+      state =>
+        set(state, path, callback(get(state, path, initialValue)))
+    ))
+
+  return [entity, update]
+}
+
+export const useResource = ({ url, callback }) => {
+  const [resource, update] = useEntity({
+    path: ['resource', url],
+    initialValue: { initializing: true, loading: true, content: undefined },
   })
 
-  const Component = ({ children, renderLoading, renderError, ...otherProps }) =>
-    <Entity {...otherProps}>
-      {
-        (resource, act) =>
-          <ResourceAutoLoader
-            url={isFunction(url) ? url(otherProps) : url}
-            resource={resource}
-            act={act}
-            callback={callback}
-            render={children}
-            renderLoading={renderLoading}
-            renderError={renderError}
-          />
-      }
-    </Entity>
+  useEffect(() => {
+    if (resource.initializing) {
+      update(resource => {
+        resource.initializing = false
+        return resource
+      })
 
-  Component.displayName = name
+      getJSON(url)
+        .then(response =>
+          update(resource => {
+            resource.loading = false
+            resource.content = callback ? callback(response) : response
+            return resource
+          })
+        )
+        .catch(error =>
+          update(resource => {
+            resource.loading = false
+            resource.error = error
+            return resource
+          })
+        )
+    }
+  }, [url])
 
-  return Component
+  return [resource, update]
 }

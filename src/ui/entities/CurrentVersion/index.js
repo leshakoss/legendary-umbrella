@@ -1,18 +1,6 @@
-import { createEntity } from '_lib/state'
+import { useEntity } from '_lib/state'
 
-/**
- * @example
- * <CurrentVersion initialValue={versions[0].tag}>
- *   {
- *     (currentVersion, setCurrentVersion) =>
- *       // ...
- *   }
- * </VersionList>
- */
-const CurrentVersion = createEntity({
-  name: 'CurrentVersion',
-  path: 'currentVersion',
-  initialValue: ({ initialValue }) => initialValue
-})
+const useCurrentVersion = ({ initialValue }) =>
+  useEntity({ path: 'currentVersion', initialValue })
 
-export default CurrentVersion
+export default useCurrentVersion
