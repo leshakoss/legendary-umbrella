@@ -10,7 +10,7 @@ const UserListItem = ({ user }) =>
   </a>
 
 const Home = () => {
-  const [{ content: contributors = [], loading }] = useContributors()
+  const [contributors = [], { loading }] = useContributors()
 
   return <React.Fragment>
     <VersionSelect />

@@ -10,7 +10,7 @@ const PreloadDocs = ({ docsKey }) => {
 }
 
 const VersionSelect = () => {
-  const [{ content: versions = [], loading }] = useVersionList()
+  const [versions = [], { loading }] = useVersionList()
 
   const [currentVersion, setCurrentVersion] = useCurrentVersion({
     initialValue: versions[0] && versions[0].tag
